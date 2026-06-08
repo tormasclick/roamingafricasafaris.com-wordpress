@@ -1,0 +1,22 @@
+# WordPress core
+wp-admin/
+wp-includes/
+wp-content/uploads/
+wp-content/languages/
+wp-content/upgrade/
+
+wp-config.php
+wp-config-sample.php
+
+.DS_Store
+*.log
+debug.log
+error_log
+
+# Backups
+*.sql
+*.tar.gz
+*.bak
+
+.vscode/
+.idea/
