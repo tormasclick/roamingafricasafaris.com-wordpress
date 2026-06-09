@@ -202,3 +202,104 @@ function roaming_get_featured_destinations() {
         'order' => 'DESC'
     ));
 }
+
+// Register Hotels Custom Post Type
+function register_hotel_cpt() {
+    $labels = array(
+        'name' => 'Hotels & Lodges',
+        'singular_name' => 'Hotel',
+        'menu_name' => 'Hotels',
+        'add_new' => 'Add New Hotel',
+        'add_new_item' => 'Add New Hotel',
+        'edit_item' => 'Edit Hotel',
+        'new_item' => 'New Hotel',
+        'view_item' => 'View Hotel',
+        'search_items' => 'Search Hotels',
+        'not_found' => 'No hotels found',
+    );
+    
+    $args = array(
+        'labels' => $labels,
+        'public' => true,
+        'publicly_queryable' => true,
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'query_var' => true,
+        'rewrite' => array('slug' => 'hotel'),
+        'capability_type' => 'post',
+        'has_archive' => true,
+        'menu_position' => 21,
+        'menu_icon' => 'dashicons-building',
+        'supports' => array('title', 'editor', 'thumbnail', 'excerpt'),
+        'show_in_rest' => true,
+    );
+    
+    register_post_type('hotel', $args);
+}
+add_action('init', 'register_hotel_cpt');
+
+// Add custom meta boxes for hotel details
+function hotel_add_meta_boxes() {
+    add_meta_box(
+        'hotel_details',
+        'Hotel Details',
+        'hotel_details_callback',
+        'hotel',
+        'normal',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'hotel_add_meta_boxes');
+
+function hotel_details_callback($post) {
+    wp_nonce_field('hotel_details', 'hotel_details_nonce');
+    $location = get_post_meta($post->ID, '_hotel_location', true);
+    $price_from = get_post_meta($post->ID, '_hotel_price_from', true);
+    $tier = get_post_meta($post->ID, '_hotel_tier', true);
+    ?>
+    <p>
+        <label>Location:</label>
+        <input type="text" name="hotel_location" value="<?php echo esc_attr($location); ?>" style="width:100%">
+    </p>
+    <p>
+        <label>Price From (per night):</label>
+        <input type="text" name="hotel_price_from" value="<?php echo esc_attr($price_from); ?>" placeholder="$220" style="width:100%">
+    </p>
+    <p>
+        <label>Tier:</label>
+        <select name="hotel_tier" style="width:100%">
+            <option value="luxury" <?php selected($tier, 'luxury'); ?>>Luxury</option>
+            <option value="mid-range" <?php selected($tier, 'mid-range'); ?>>Mid-Range</option>
+            <option value="budget" <?php selected($tier, 'budget'); ?>>Budget</option>
+        </select>
+    </p>
+    <?php
+}
+
+function hotel_save_meta_boxes($post_id) {
+    if(!isset($_POST['hotel_details_nonce'])) return;
+    if(!wp_verify_nonce($_POST['hotel_details_nonce'], 'hotel_details')) return;
+    if(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+    
+    if(isset($_POST['hotel_location'])) {
+        update_post_meta($post_id, '_hotel_location', sanitize_text_field($_POST['hotel_location']));
+    }
+    if(isset($_POST['hotel_price_from'])) {
+        update_post_meta($post_id, '_hotel_price_from', sanitize_text_field($_POST['hotel_price_from']));
+    }
+    if(isset($_POST['hotel_tier'])) {
+        update_post_meta($post_id, '_hotel_tier', sanitize_text_field($_POST['hotel_tier']));
+    }
+}
+add_action('save_post_hotel', 'hotel_save_meta_boxes');
+
+// Get featured hotels for homepage
+function roaming_get_featured_hotels() {
+    return get_posts(array(
+        'post_type' => 'hotel',
+        'posts_per_page' => 4,
+        'meta_key' => '_thumbnail_id',
+        'orderby' => 'date',
+        'order' => 'DESC'
+    ));
+}

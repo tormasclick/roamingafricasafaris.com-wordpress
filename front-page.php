@@ -21,6 +21,9 @@ get_header(); ?>
 <!-- Popular Destinations Section -->
 <?php get_template_part('template-parts/popular-destinations'); ?>
 
+<!-- Hotels & Safari Lodges Section -->
+<?php get_template_part('template-parts/hotels-section'); ?>
+
 <!-- CTA Section -->
 <?php get_template_part('template-parts/cta-section'); ?>
 
