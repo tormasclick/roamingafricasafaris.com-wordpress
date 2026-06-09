@@ -69,3 +69,4 @@ if(!function_exists('roaming_get_hero_slides')) {
         return $slides;
     }
 }
+require_once get_template_directory() . '/inc/why-travel-admin.php';
