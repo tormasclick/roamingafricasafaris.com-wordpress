@@ -1,7 +1,7 @@
 <?php
 /**
  * Roaming Africa Theme Functions
- * Version: 2.0 (Modular)
+ * Version: 2.0 (Clean)
  */
 
 // Define theme constants
@@ -15,6 +15,12 @@ function roaming_africa_setup() {
     add_theme_support('post-thumbnails');
     add_theme_support('custom-logo');
     add_theme_support('html5', array('search-form', 'comment-form', 'comment-list', 'gallery', 'caption'));
+    
+    // Register navigation menus
+    register_nav_menus(array(
+        'primary' => __('Primary Menu', 'roaming-africa'),
+        'footer' => __('Footer Menu', 'roaming-africa'),
+    ));
 }
 add_action('after_setup_theme', 'roaming_africa_setup');
 
@@ -44,8 +50,7 @@ add_action('init', 'register_safari_cpt');
 require_once get_template_directory() . '/inc/customizer/theme-customizer.php';
 require_once get_template_directory() . '/inc/dynamic-nav.php';
 require_once get_template_directory() . '/inc/hero-manager.php';
-require_once get_template_directory() . '/inc/customizer/why-travel.php';
-require_once get_template_directory() . '/inc/dynamic-sections.php';
+require_once get_template_directory() . '/inc/why-travel-admin.php';
 
 // Hero slides function
 if(!function_exists('roaming_get_hero_slides')) {
@@ -69,4 +74,131 @@ if(!function_exists('roaming_get_hero_slides')) {
         return $slides;
     }
 }
-require_once get_template_directory() . '/inc/why-travel-admin.php';
+
+// Helper function for destinations (if needed for frontend)
+function roaming_get_destinations() {
+    return get_option('roaming_destinations', array());
+}
+require_once get_template_directory() . '/inc/destinations-admin.php';
+
+// Direct function definition for navigation
+
+// CTA Section functions
+function roaming_get_cta() {
+    return array(
+        'enabled' => get_option('roaming_cta_enabled', true),
+        'title' => get_option('roaming_cta_title', 'Ready for Your Safari Adventure?'),
+        'subtitle' => get_option('roaming_cta_subtitle', 'Contact us today to start planning your dream African safari'),
+        'button_text' => get_option('roaming_cta_button_text', 'Get in Touch →'),
+        'button_url' => get_option('roaming_cta_button_url', '/contact')
+    );
+}
+
+// Safari Planner functions
+function roaming_get_planner_destinations() {
+    return get_option('roaming_planner_destinations_list', array('Kenya Safari', 'Tanzania Safari', 'Zanzibar Beach', 'Combo Safari'));
+}
+
+// Also add planner title function if missing
+function roaming_get_planner_title() {
+    return get_option('roaming_planner_title', 'Plan Your Safari');
+}
+
+// Register Destinations Custom Post Type
+function register_destination_cpt() {
+    $labels = array(
+        'name' => 'Destinations',
+        'singular_name' => 'Destination',
+        'menu_name' => 'Destinations',
+        'add_new' => 'Add New Destination',
+        'add_new_item' => 'Add New Destination',
+        'edit_item' => 'Edit Destination',
+        'new_item' => 'New Destination',
+        'view_item' => 'View Destination',
+        'search_items' => 'Search Destinations',
+        'not_found' => 'No destinations found',
+        'not_found_in_trash' => 'No destinations found in trash',
+    );
+    
+    $args = array(
+        'labels' => $labels,
+        'public' => true,
+        'publicly_queryable' => true,
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'query_var' => true,
+        'rewrite' => array('slug' => 'destination'),
+        'capability_type' => 'post',
+        'has_archive' => true,
+        'hierarchical' => false,
+        'menu_position' => 20,
+        'menu_icon' => 'dashicons-location-alt',
+        'supports' => array('title', 'editor', 'thumbnail', 'excerpt', 'custom-fields'),
+        'show_in_rest' => true, // Gutenberg support
+    );
+    
+    register_post_type('destination', $args);
+}
+add_action('init', 'register_destination_cpt');
+
+// Add custom meta boxes for destination details
+function destination_add_meta_boxes() {
+    add_meta_box(
+        'destination_details',
+        'Destination Details',
+        'destination_details_callback',
+        'destination',
+        'normal',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'destination_add_meta_boxes');
+
+function destination_details_callback($post) {
+    wp_nonce_field('destination_details', 'destination_details_nonce');
+    $country = get_post_meta($post->ID, '_destination_country', true);
+    $best_time = get_post_meta($post->ID, '_destination_best_time', true);
+    $wildlife = get_post_meta($post->ID, '_destination_wildlife', true);
+    ?>
+    <p>
+        <label>Country:</label>
+        <input type="text" name="destination_country" value="<?php echo esc_attr($country); ?>" style="width:100%">
+    </p>
+    <p>
+        <label>Best Time to Visit:</label>
+        <input type="text" name="destination_best_time" value="<?php echo esc_attr($best_time); ?>" style="width:100%">
+    </p>
+    <p>
+        <label>Wildlife / Highlights:</label>
+        <textarea name="destination_wildlife" rows="3" style="width:100%"><?php echo esc_textarea($wildlife); ?></textarea>
+    </p>
+    <?php
+}
+
+function destination_save_meta_boxes($post_id) {
+    if(!isset($_POST['destination_details_nonce'])) return;
+    if(!wp_verify_nonce($_POST['destination_details_nonce'], 'destination_details')) return;
+    if(defined('DOING_AUTOSAVE') && DOING_AUTOSAVE) return;
+    
+    if(isset($_POST['destination_country'])) {
+        update_post_meta($post_id, '_destination_country', sanitize_text_field($_POST['destination_country']));
+    }
+    if(isset($_POST['destination_best_time'])) {
+        update_post_meta($post_id, '_destination_best_time', sanitize_text_field($_POST['destination_best_time']));
+    }
+    if(isset($_POST['destination_wildlife'])) {
+        update_post_meta($post_id, '_destination_wildlife', sanitize_textarea_field($_POST['destination_wildlife']));
+    }
+}
+add_action('save_post_destination', 'destination_save_meta_boxes');
+
+// Get featured destinations for homepage
+function roaming_get_featured_destinations() {
+    return get_posts(array(
+        'post_type' => 'destination',
+        'posts_per_page' => 8,
+        'meta_key' => '_thumbnail_id',
+        'orderby' => 'date',
+        'order' => 'DESC'
+    ));
+}

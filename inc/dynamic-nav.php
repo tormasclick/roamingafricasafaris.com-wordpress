@@ -1,4 +1,8 @@
 <?php
+/**
+ * Dynamic Navigation Functions
+ */
+
 // Add admin menu for navigation
 function roaming_nav_admin_menu() {
     add_menu_page(
@@ -21,7 +25,7 @@ function roaming_nav_admin_page() {
                 if(!empty($label)) {
                     $nav_items[] = array(
                         'label' => sanitize_text_field($label),
-                        'url' => sanitize_url($_POST['nav_url'][$i]),
+                        'url' => esc_url_raw($_POST['nav_url'][$i]),
                         'type' => sanitize_text_field($_POST['nav_type'][$i]),
                     );
                 }
@@ -49,17 +53,17 @@ function roaming_nav_admin_page() {
                 </thead>
                 <tbody id="nav-sortable">
                     <?php foreach($nav_items as $i => $item): ?>
-                    <tr>
-                        <td><input type="text" name="nav_label[]" value="<?php echo esc_attr($item['label']); ?>" style="width:100%"></td>
-                        <td><input type="text" name="nav_url[]" value="<?php echo esc_attr($item['url']); ?>" style="width:100%"></td>
-                        <td>
-                            <select name="nav_type[]">
-                                <option value="link" <?php selected($item['type'], 'link'); ?>>Link</option>
-                                <option value="highlight" <?php selected($item['type'], 'highlight'); ?>>Highlight Button</option>
-                            </select>
-                        </td>
-                        <td><button type="button" class="button remove-row">Remove</button></td>
-                    </tr>
+                        <tr>
+                            <td><input type="text" name="nav_label[]" value="<?php echo esc_attr($item['label']); ?>" style="width:100%"></td>
+                            <td><input type="text" name="nav_url[]" value="<?php echo esc_attr($item['url']); ?>" style="width:100%"></td>
+                            <td>
+                                <select name="nav_type[]">
+                                    <option value="link" <?php selected($item['type'], 'link'); ?>>Link</option>
+                                    <option value="highlight" <?php selected($item['type'], 'highlight'); ?>>Highlight Button</option>
+                                </select>
+                             </tr>
+                            <td><button type="button" class="button remove-row">Remove</button></td>
+                        </tr>
                     <?php endforeach; ?>
                 </tbody>
             </table>
@@ -80,18 +84,29 @@ function roaming_nav_admin_page() {
     <?php
 }
 
+// Render navigation menu (ECHOES directly for header.php)
 function roaming_render_nav() {
     $items = get_option('roaming_nav_items', array(
         array('label' => 'Home', 'url' => '/', 'type' => 'link'),
         array('label' => 'Kenya Safaris', 'url' => '/kenya-safaris', 'type' => 'link'),
+        array('label' => 'Tanzania Safaris', 'url' => '/tanzania-safaris', 'type' => 'link'),
+        array('label' => 'Destinations', 'url' => '/destinations', 'type' => 'link'),
+        array('label' => 'Hotels', 'url' => '/hotels', 'type' => 'link'),
         array('label' => 'Contact', 'url' => '/contact', 'type' => 'highlight'),
     ));
-    
-    $html = '<nav class="desktop-nav hidden lg:flex items-center gap-1">';
-    foreach($items as $item) {
-        $class = $item['type'] == 'highlight' ? 'nav-link nav-link-highlight' : 'nav-link';
-        $html .= '<a href="' . esc_url($item['url']) . '" class="' . $class . '">' . esc_html($item['label']) . '</a>';
-    }
-    $html .= '</nav>';
-    return $html;
+    ?>
+    <nav class="desktop-nav hidden lg:flex items-center gap-1">
+        <?php foreach($items as $item): ?>
+            <?php if($item['type'] == 'highlight'): ?>
+                <a href="<?php echo esc_url($item['url']); ?>" class="nav-link nav-link-highlight" style="background: #F5A623; color: black; padding: 8px 16px; border-radius: 9999px; font-weight: bold;">
+                    <?php echo esc_html($item['label']); ?>
+                </a>
+            <?php else: ?>
+                <a href="<?php echo esc_url($item['url']); ?>" class="nav-link" style="padding: 8px 12px; color: #1a3c2c; text-decoration: none;">
+                    <?php echo esc_html($item['label']); ?>
+                </a>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    </nav>
+    <?php
 }

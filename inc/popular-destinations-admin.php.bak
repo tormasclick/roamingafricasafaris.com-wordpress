@@ -1,0 +1,164 @@
+<?php
+/**
+ * Popular Destinations - Admin Management with Images
+ */
+
+// Add admin menu
+function roaming_destinations_admin_menu() {
+    add_menu_page(
+        'Popular Destinations',
+        'Destinations',
+        'manage_options',
+        'roaming-destinations',
+        'roaming_destinations_admin_page',
+        'dashicons-location-alt',
+        31
+    );
+}
+add_action('admin_menu', 'roaming_destinations_admin_menu');
+
+// Enqueue media uploader
+function roaming_destinations_admin_scripts($hook) {
+    if($hook == 'toplevel_page_roaming-destinations') {
+        wp_enqueue_media();
+    }
+}
+add_action('admin_enqueue_scripts', 'roaming_destinations_admin_scripts');
+
+// Admin page
+function roaming_destinations_admin_page() {
+    // Save destinations
+    if(isset($_POST['save_destinations'])) {
+        $destinations = array();
+        if(isset($_POST['dest_name']) && is_array($_POST['dest_name'])) {
+            for($i = 0; $i < count($_POST['dest_name']); $i++) {
+                if(!empty($_POST['dest_name'][$i])) {
+                    $destinations[] = array(
+                        'name' => sanitize_text_field($_POST['dest_name'][$i]),
+                        'location' => sanitize_text_field($_POST['dest_location'][$i]),
+                        'image' => esc_url_raw($_POST['dest_image'][$i]),
+                        'slug' => sanitize_title($_POST['dest_name'][$i])
+                    );
+                }
+            }
+        }
+        update_option('roaming_popular_destinations', json_encode($destinations));
+        echo '<div class="notice notice-success is-dismissible"><p>Destinations saved successfully!</p></div>';
+    }
+    
+    // Get current destinations
+    $destinations_json = get_option('roaming_popular_destinations', '');
+    $destinations = array();
+    if(!empty($destinations_json)) {
+        $destinations = json_decode($destinations_json, true);
+    }
+    
+    // Default destinations if empty
+    if(empty($destinations)) {
+        $destinations = array(
+            array('name' => 'Masai Mara National Reserve', 'location' => 'Kenya', 'image' => 'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=600&h=400&fit=crop', 'slug' => 'masai-mara'),
+            array('name' => 'Amboseli National Park', 'location' => 'Kenya', 'image' => 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=600&h=400&fit=crop', 'slug' => 'amboseli'),
+            array('name' => 'Lake Nakuru National Park', 'location' => 'Kenya', 'image' => 'https://images.unsplash.com/photo-1569529463542-ee80a8f9c29b?w=600&h=400&fit=crop', 'slug' => 'lake-nakuru'),
+            array('name' => 'Samburu and Shaba', 'location' => 'Kenya', 'image' => 'https://images.unsplash.com/photo-1549366021-7f13762179b1?w=600&h=400&fit=crop', 'slug' => 'samburu'),
+            array('name' => 'Tsavo National Park', 'location' => 'Kenya', 'image' => 'https://images.unsplash.com/photo-1564767655780-76e5b6fd3b9b?w=600&h=400&fit=crop', 'slug' => 'tsavo'),
+            array('name' => 'Nairobi National Park', 'location' => 'Kenya', 'image' => 'https://images.unsplash.com/photo-1566378247494-1a9c69b8e0d1?w=600&h=400&fit=crop', 'slug' => 'nairobi'),
+            array('name' => 'Mombasa and Diani Beach', 'location' => 'Kenya', 'image' => 'https://images.unsplash.com/photo-1570077188670-6e65c2d60404?w=600&h=400&fit=crop', 'slug' => 'mombasa-diani'),
+            array('name' => 'Serengeti National Park', 'location' => 'Tanzania', 'image' => 'https://images.unsplash.com/photo-1536421462769-7c71d2e8ea9f?w=600&h=400&fit=crop', 'slug' => 'serengeti')
+        );
+    }
+    ?>
+    <div class="wrap">
+        <h1>Popular Destinations Manager</h1>
+        <p>Manage the destinations displayed on the homepage. Add, edit, or remove destinations.</p>
+        
+        <style>
+            .destination-card { background: #f9f9f9; border: 1px solid #ddd; margin: 20px 0; padding: 20px; border-radius: 8px; position: relative; }
+            .destination-card h3 { margin-top: 0; }
+            .remove-destination { position: absolute; top: 20px; right: 20px; background: #dc3232; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; }
+            .remove-destination:hover { background: #c02222; }
+            .form-table th { width: 150px; }
+            .image-preview { max-width: 150px; max-height: 80px; margin-top: 10px; border: 1px solid #ddd; padding: 5px; border-radius: 4px; }
+        </style>
+        
+        <form method="post">
+            <div id="destinations-container">
+                <?php foreach($destinations as $index => $dest): ?>
+                    <div class="destination-card">
+                        <button type="button" class="remove-destination">Remove</button>
+                        <h3>Destination <?php echo $index + 1; ?></h3>
+                        <table class="form-table">
+                            <tr>
+                                <th><label>Destination Name</label></th>
+                                <td><input type="text" name="dest_name[]" value="<?php echo esc_attr($dest['name']); ?>" class="regular-text" required /></td>
+                            </tr>
+                            <tr>
+                                <th><label>Location/Country</label></th>
+                                <td><input type="text" name="dest_location[]" value="<?php echo esc_attr($dest['location']); ?>" class="regular-text" required /></td>
+                            </tr>
+                            <tr>
+                                <th><label>Image URL</label></th>
+                                <td>
+                                    <input type="text" name="dest_image[]" value="<?php echo esc_url($dest['image']); ?>" class="large-text" id="image_<?php echo $index; ?>" />
+                                    <button type="button" class="button upload-image-btn" data-target="image_<?php echo $index; ?>">Upload Image</button>
+                                    <?php if($dest['image']): ?>
+                                        <div><img src="<?php echo esc_url($dest['image']); ?>" class="image-preview" /></div>
+                                    <?php endif; ?>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+            
+            <button type="button" class="button" id="add-destination" style="margin: 20px 0;">+ Add New Destination</button>
+            <p class="submit">
+                <button type="submit" name="save_destinations" class="button button-primary">Save All Destinations</button>
+            </p>
+        </form>
+    </div>
+    
+    <script>
+    jQuery(document).ready(function($) {
+        // Image upload functionality
+        $(document).on('click', '.upload-image-btn', function(e) {
+            e.preventDefault();
+            var target = $(this).data('target');
+            var customUploader = wp.media({
+                title: 'Select Image',
+                button: { text: 'Use this image' },
+                multiple: false
+            }).on('select', function() {
+                var attachment = customUploader.state().get('selection').first().toJSON();
+                $('#' + target).val(attachment.url);
+                $(this).closest('td').find('.image-preview').remove();
+                $(this).closest('td').append('<div><img src="' + attachment.url + '" class="image-preview" /></div>');
+            }.bind(this)).open();
+        });
+        
+        // Add new destination
+        $('#add-destination').click(function() {
+            var count = $('.destination-card').length + 1;
+            var html = '<div class="destination-card">' +
+                '<button type="button" class="remove-destination">Remove</button>' +
+                '<h3>Destination ' + count + '</h3>' +
+                '<table class="form-table">' +
+                '<tr><th><label>Destination Name</label></th><td><input type="text" name="dest_name[]" class="regular-text" required /></td></tr>' +
+                '<tr><th><label>Location/Country</label></th><td><input type="text" name="dest_location[]" class="regular-text" required /></td></tr>' +
+                '<tr><th><label>Image URL</label></th><td><input type="text" name="dest_image[]" class="large-text" /><button type="button" class="button upload-image-btn">Upload Image</button></td></tr>' +
+                '</table></div>';
+            $('#destinations-container').append(html);
+        });
+        
+        // Remove destination
+        $(document).on('click', '.remove-destination', function() {
+            if(confirm('Remove this destination?')) {
+                $(this).closest('.destination-card').remove();
+                $('.destination-card').each(function(i) {
+                    $(this).find('h3').text('Destination ' + (i + 1));
+                });
+            }
+        });
+    });
+    </script>
+    <?php
+}
