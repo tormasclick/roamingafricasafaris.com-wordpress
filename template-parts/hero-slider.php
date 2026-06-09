@@ -4,6 +4,8 @@ if(empty($slides)) {
     echo '<!-- No hero slides found -->';
     return;
 }
+
+$whatsapp_number = get_option('roaming_whatsapp_number', '+254722433910');
 ?>
 
 <div style="position: relative; height: 500px; overflow: hidden;">
@@ -30,9 +32,14 @@ if(empty($slides)) {
                 <div class="hero-content" data-content="<?php echo $index; ?>" style="display: <?php echo $index === 0 ? 'block' : 'none'; ?>;">
                     <h1 style="font-size: 48px; margin-bottom: 20px;"><?php echo esc_html($slide['title']); ?></h1>
                     <p style="font-size: 18px; margin-bottom: 30px;"><?php echo esc_html($slide['subtitle']); ?></p>
-                    <a href="<?php echo esc_url($slide['button_url']); ?>" style="background: #F5A623; color: black; padding: 12px 30px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-block;">
-                        <?php echo esc_html($slide['button_text']); ?> →
-                    </a>
+                    <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                        <a href="<?php echo esc_url($slide['button_url']); ?>" style="background: #F5A623; color: #1a3c2c; padding: 12px 30px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s;">
+                            <i class="fas fa-paper-plane"></i> <?php echo esc_html($slide['button_text']); ?> →
+                        </a>
+                        <a href="https://wa.me/<?php echo preg_replace('/[^0-9]/', '', $whatsapp_number); ?>?text=Hi! I'd like to plan a safari with Roaming Africa Tours." target="_blank" rel="noopener noreferrer" style="background: #25D366; color: white; padding: 12px 30px; border-radius: 30px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s;">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </a>
+                    </div>
                 </div>
             <?php endforeach; ?>
             

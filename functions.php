@@ -1,9 +1,20 @@
 <?php
+/**
+ * Roaming Africa Theme Functions
+ * Version: 2.0 (Modular)
+ */
+
+// Define theme constants
+define('ROAMING_THEME_VERSION', '2.0');
+define('ROAMING_THEME_DIR', get_template_directory());
+define('ROAMING_THEME_URI', get_template_directory_uri());
+
 // Theme setup
 function roaming_africa_setup() {
     add_theme_support('title-tag');
     add_theme_support('post-thumbnails');
     add_theme_support('custom-logo');
+    add_theme_support('html5', array('search-form', 'comment-form', 'comment-list', 'gallery', 'caption'));
 }
 add_action('after_setup_theme', 'roaming_africa_setup');
 
@@ -22,63 +33,39 @@ function register_safari_cpt() {
         'labels' => array('name' => 'Safaris', 'singular_name' => 'Safari'),
         'public' => true,
         'has_archive' => true,
-        'supports' => array('title', 'editor', 'thumbnail'),
+        'supports' => array('title', 'editor', 'thumbnail', 'excerpt'),
         'menu_icon' => 'dashicons-palmtree',
+        'show_in_rest' => true,
     ));
 }
 add_action('init', 'register_safari_cpt');
 
-// Include customizer and navigation
+// Include required files
 require_once get_template_directory() . '/inc/customizer/theme-customizer.php';
 require_once get_template_directory() . '/inc/dynamic-nav.php';
-
-// Include Hero Manager
 require_once get_template_directory() . '/inc/hero-manager.php';
+require_once get_template_directory() . '/inc/customizer/why-travel.php';
+require_once get_template_directory() . '/inc/dynamic-sections.php';
 
-// Hero slides function - fallback
+// Hero slides function
 if(!function_exists('roaming_get_hero_slides')) {
     function roaming_get_hero_slides() {
         $slides = get_option('roaming_hero_slides', array());
+        $default_images = array(
+            'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1600',
+            'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1600',
+            'https://images.unsplash.com/photo-1536421462769-7c71d2e8ea9f?w=1600',
+            'https://images.unsplash.com/photo-1570077188670-6e65c2d60404?w=1600',
+        );
         
         if(empty($slides)) {
             $slides = array(
-                array(
-                    'title' => 'Welcome to Roaming Africa Tours & Safaris',
-                    'subtitle' => 'Leading DMC for Kenya, Tanzania and Zanzibar',
-                    'image' => 'https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1600',
-                    'button_text' => 'Plan My Safari',
-                    'button_url' => '/kenya-safaris',
-                ),
-                array(
-                    'title' => 'Elephants Under Kilimanjaro',
-                    'subtitle' => 'Amboseli National Park · Luxury Lodges',
-                    'image' => 'https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?w=1600',
-                    'button_text' => 'Explore Now',
-                    'button_url' => '/destination/amboseli',
-                ),
-                array(
-                    'title' => 'Tanzania Wildlife, Curated by Locals',
-                    'subtitle' => 'Serengeti · Ngorongoro Crater',
-                    'image' => 'https://images.unsplash.com/photo-1536421462769-7c71d2e8ea9f?w=1600',
-                    'button_text' => 'View Safaris',
-                    'button_url' => '/tanzania-safaris',
-                ),
-                array(
-                    'title' => 'Zanzibar Beaches, Effortlessly Planned',
-                    'subtitle' => 'Beach Resorts · Stone Town · Spice Tours',
-                    'image' => 'https://images.unsplash.com/photo-1570077188670-6e65c2d60404?w=1600',
-                    'button_text' => 'Book Now',
-                    'button_url' => '/tanzania-safaris/zanzibar',
-                ),
+                array('title' => 'Welcome to Roaming Africa Tours & Safaris', 'subtitle' => 'Leading DMC for Kenya, Tanzania and Zanzibar', 'image' => $default_images[0], 'button_text' => 'Plan My Safari', 'button_url' => '/kenya-safaris'),
+                array('title' => 'Elephants Under Kilimanjaro', 'subtitle' => 'Amboseli National Park · Luxury Lodges', 'image' => $default_images[1], 'button_text' => 'Explore Now', 'button_url' => '/destination/amboseli'),
+                array('title' => 'Tanzania Wildlife, Curated by Locals', 'subtitle' => 'Serengeti · Ngorongoro Crater', 'image' => $default_images[2], 'button_text' => 'View Safaris', 'button_url' => '/tanzania-safaris'),
+                array('title' => 'Zanzibar Beaches, Effortlessly Planned', 'subtitle' => 'Beach Resorts · Stone Town · Spice Tours', 'image' => $default_images[3], 'button_text' => 'Book Now', 'button_url' => '/tanzania-safaris/zanzibar'),
             );
         }
-        
         return $slides;
     }
 }
-
-// Include Why Travel customizer
-require_once get_template_directory() . '/inc/customizer/why-travel.php';
-
-// Include dynamic sections manager
-require_once get_template_directory() . '/inc/dynamic-sections.php';
