@@ -303,3 +303,216 @@ function roaming_get_featured_hotels() {
         'order' => 'DESC'
     ));
 }
+
+// Register Vehicles Custom Post Type
+function register_vehicle_cpt() {
+    $labels = array(
+        'name' => 'Safari Vehicles',
+        'singular_name' => 'Vehicle',
+        'menu_name' => 'Vehicles',
+        'add_new' => 'Add New Vehicle',
+        'add_new_item' => 'Add New Vehicle',
+        'edit_item' => 'Edit Vehicle',
+        'new_item' => 'New Vehicle',
+        'view_item' => 'View Vehicle',
+        'search_items' => 'Search Vehicles',
+        'not_found' => 'No vehicles found',
+    );
+    
+    $args = array(
+        'labels' => $labels,
+        'public' => true,
+        'publicly_queryable' => true,
+        'show_ui' => true,
+        'show_in_menu' => true,
+        'query_var' => true,
+        'rewrite' => array('slug' => 'vehicle'),
+        'capability_type' => 'post',
+        'has_archive' => true,
+        'menu_position' => 22,
+        'menu_icon' => 'dashicons-car',
+        'supports' => array('title', 'editor', 'thumbnail', 'excerpt'),
+        'show_in_rest' => true,
+    );
+    
+    register_post_type('vehicle', $args);
+}
+add_action('init', 'register_vehicle_cpt');
+
+// Add meta boxes for vehicle details
+function vehicle_add_meta_boxes() {
+    add_meta_box(
+        'vehicle_details',
+        'Vehicle Details',
+        'vehicle_details_callback',
+        'vehicle',
+        'normal',
+        'high'
+    );
+    add_meta_box(
+        'vehicle_gallery',
+        'Vehicle Gallery',
+        'vehicle_gallery_callback',
+        'vehicle',
+        'normal',
+        'high'
+    );
+    add_meta_box(
+        'vehicle_faqs',
+        'Vehicle FAQs',
+        'vehicle_faqs_callback',
+        'vehicle',
+        'normal',
+        'high'
+    );
+}
+add_action('add_meta_boxes', 'vehicle_add_meta_boxes');
+
+function vehicle_details_callback($post) {
+    wp_nonce_field('vehicle_details', 'vehicle_details_nonce');
+    $capacity = get_post_meta($post->ID, '_vehicle_capacity', true);
+    $vehicle_type = get_post_meta($post->ID, '_vehicle_type', true);
+    $price_from = get_post_meta($post->ID, '_vehicle_price_from', true);
+    $features = get_post_meta($post->ID, '_vehicle_features', true);
+    ?>
+    <p>
+        <label>Vehicle Type:</label>
+        <select name="vehicle_type" style="width:100%">
+            <option value="safari" <?php selected($vehicle_type, 'safari'); ?>>Safari Vehicle (4x4)</option>
+            <option value="self-drive" <?php selected($vehicle_type, 'self-drive'); ?>>Self Drive</option>
+            <option value="bus" <?php selected($vehicle_type, 'bus'); ?>>Bus / Coach</option>
+            <option value="helicopter" <?php selected($vehicle_type, 'helicopter'); ?>>Helicopter</option>
+        </select>
+    </p>
+    <p>
+        <label>Capacity (passengers):</label>
+        <input type="text" name="vehicle_capacity" value="<?php echo esc_attr($capacity); ?>" style="width:100%">
+    </p>
+    <p>
+        <label>Price From (per day):</label>
+        <input type="text" name="vehicle_price_from" value="<?php echo esc_attr($price_from); ?>" style="width:100%">
+    </p>
+    <p>
+        <label>Key Features (comma separated):</label>
+        <input type="text" name="vehicle_features" value="<?php echo esc_attr($features); ?>" style="width:100%">
+    </p>
+    <?php
+}
+
+function vehicle_gallery_callback($post) {
+    wp_nonce_field('vehicle_gallery', 'vehicle_gallery_nonce');
+    $gallery_images = get_post_meta($post->ID, '_vehicle_gallery', true);
+    $gallery_images = $gallery_images ? explode(',', $gallery_images) : array();
+    ?>
+    <div id="vehicle-gallery-container">
+        <div id="gallery-images">
+            <?php foreach($gallery_images as $image_id): 
+                $image_url = wp_get_attachment_url($image_id);
+                if($image_url):
+            ?>
+                <div style="display: inline-block; margin: 10px; position: relative;">
+                    <img src="<?php echo esc_url($image_url); ?>" style="width: 150px; height: 100px; object-fit: cover; border-radius: 8px;">
+                    <button type="button" class="button remove-gallery-image" data-id="<?php echo $image_id; ?>" style="position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer;">×</button>
+                </div>
+            <?php endif; endforeach; ?>
+        </div>
+        <button type="button" class="button" id="add-gallery-images">Add Gallery Images</button>
+        <input type="hidden" name="vehicle_gallery" id="vehicle_gallery" value="<?php echo esc_attr(implode(',', $gallery_images)); ?>">
+    </div>
+    <script>
+    jQuery(document).ready(function($) {
+        $('#add-gallery-images').click(function(e) {
+            e.preventDefault();
+            var frame = wp.media({
+                title: 'Select Gallery Images',
+                multiple: true,
+                library: { type: 'image' },
+                button: { text: 'Add to Gallery' }
+            });
+            frame.on('select', function() {
+                var selection = frame.state().get('selection');
+                var ids = $('#vehicle_gallery').val() ? $('#vehicle_gallery').val().split(',') : [];
+                selection.map(function(attachment) {
+                    attachment = attachment.toJSON();
+                    ids.push(attachment.id);
+                    $('#gallery-images').append('<div style="display: inline-block; margin: 10px; position: relative;"><img src="' + attachment.url + '" style="width: 150px; height: 100px; object-fit: cover; border-radius: 8px;"><button type="button" class="button remove-gallery-image" data-id="' + attachment.id + '" style="position: absolute; top: 5px; right: 5px; background: red; color: white; border: none; border-radius: 50%; width: 20px; height: 20px; cursor: pointer;">×</button></div>');
+                });
+                $('#vehicle_gallery').val(ids.join(','));
+            });
+            frame.open();
+        });
+        $(document).on('click', '.remove-gallery-image', function() {
+            var id = $(this).data('id');
+            var ids = $('#vehicle_gallery').val().split(',');
+            var newIds = ids.filter(function(i) { return i != id; });
+            $('#vehicle_gallery').val(newIds.join(','));
+            $(this).closest('div').remove();
+        });
+    });
+    </script>
+    <?php
+}
+
+function vehicle_faqs_callback($post) {
+    wp_nonce_field('vehicle_faqs', 'vehicle_faqs_nonce');
+    $faqs = get_post_meta($post->ID, '_vehicle_faqs', true);
+    $faqs = $faqs ? json_decode($faqs, true) : array();
+    ?>
+    <div id="faqs-container">
+        <?php foreach($faqs as $index => $faq): ?>
+            <div style="background: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 8px;">
+                <input type="text" name="faq_question[]" value="<?php echo esc_attr($faq['question']); ?>" placeholder="Question" style="width: 100%; margin-bottom: 10px;">
+                <textarea name="faq_answer[]" rows="3" placeholder="Answer" style="width: 100%;"><?php echo esc_textarea($faq['answer']); ?></textarea>
+                <button type="button" class="button remove-faq">Remove FAQ</button>
+            </div>
+        <?php endforeach; ?>
+    </div>
+    <button type="button" class="button" id="add-faq">Add FAQ</button>
+    <script>
+    jQuery(document).ready(function($) {
+        $('#add-faq').click(function() {
+            $('#faqs-container').append('<div style="background: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 8px;"><input type="text" name="faq_question[]" placeholder="Question" style="width: 100%; margin-bottom: 10px;"><textarea name="faq_answer[]" rows="3" placeholder="Answer" style="width: 100%;"></textarea><button type="button" class="button remove-faq">Remove FAQ</button></div>');
+        });
+        $(document).on('click', '.remove-faq', function() {
+            $(this).closest('div').remove();
+        });
+    });
+    </script>
+    <?php
+}
+
+function vehicle_save_meta_boxes($post_id) {
+    if(isset($_POST['vehicle_details_nonce']) && wp_verify_nonce($_POST['vehicle_details_nonce'], 'vehicle_details')) {
+        if(isset($_POST['vehicle_capacity'])) update_post_meta($post_id, '_vehicle_capacity', sanitize_text_field($_POST['vehicle_capacity']));
+        if(isset($_POST['vehicle_type'])) update_post_meta($post_id, '_vehicle_type', sanitize_text_field($_POST['vehicle_type']));
+        if(isset($_POST['vehicle_price_from'])) update_post_meta($post_id, '_vehicle_price_from', sanitize_text_field($_POST['vehicle_price_from']));
+        if(isset($_POST['vehicle_features'])) update_post_meta($post_id, '_vehicle_features', sanitize_text_field($_POST['vehicle_features']));
+    }
+    if(isset($_POST['vehicle_gallery_nonce']) && wp_verify_nonce($_POST['vehicle_gallery_nonce'], 'vehicle_gallery')) {
+        if(isset($_POST['vehicle_gallery'])) update_post_meta($post_id, '_vehicle_gallery', sanitize_text_field($_POST['vehicle_gallery']));
+    }
+    if(isset($_POST['vehicle_faqs_nonce']) && wp_verify_nonce($_POST['vehicle_faqs_nonce'], 'vehicle_faqs')) {
+        $faqs = array();
+        if(isset($_POST['faq_question']) && is_array($_POST['faq_question'])) {
+            for($i = 0; $i < count($_POST['faq_question']); $i++) {
+                if(!empty($_POST['faq_question'][$i])) {
+                    $faqs[] = array(
+                        'question' => sanitize_text_field($_POST['faq_question'][$i]),
+                        'answer' => sanitize_textarea_field($_POST['faq_answer'][$i])
+                    );
+                }
+            }
+        }
+        update_post_meta($post_id, '_vehicle_faqs', json_encode($faqs));
+    }
+}
+add_action('save_post_vehicle', 'vehicle_save_meta_boxes');
+
+function roaming_get_featured_vehicles() {
+    return get_posts(array(
+        'post_type' => 'vehicle',
+        'posts_per_page' => 3,
+        'orderby' => 'date',
+        'order' => 'DESC'
+    ));
+}

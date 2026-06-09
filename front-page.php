@@ -24,6 +24,9 @@ get_header(); ?>
 <!-- Hotels & Safari Lodges Section -->
 <?php get_template_part('template-parts/hotels-section'); ?>
 
+<!-- Safari Vehicles Section -->
+<?php get_template_part('template-parts/vehicles-section'); ?>
+
 <!-- CTA Section -->
 <?php get_template_part('template-parts/cta-section'); ?>
 
