@@ -520,3 +520,4 @@ require_once get_template_directory() . '/inc/booking-steps-admin.php';
 require_once get_template_directory() . '/inc/partners-admin.php';
 require_once get_template_directory() . '/inc/final-cta-admin.php';
 require_once get_template_directory() . '/inc/footer-admin.php';
+require_once get_template_directory() . '/inc/featured-safaris-admin.php';
