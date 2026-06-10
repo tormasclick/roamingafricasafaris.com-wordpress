@@ -224,21 +224,101 @@ add_action('wp_head', 'safari_cf7_styles');
 // Add Contact Form 7 custom styling
 
 // Add Contact Form 7 custom styling for safari pages
-
-// Add Contact Form 7 custom styling with reduced spacing
-
-// Add Contact Form 7 custom styling for safari pages
 function safari_cf7_custom_styles() {
     if(is_singular('safari')) {
         echo '<style>
-        .safari-booking-form .form-group { margin-bottom: 8px; }
-        .safari-booking-form .form-control { width: 100%; padding: 12px 14px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 14px; background: white; box-sizing: border-box; }
+        .safari-booking-form .form-group { margin-bottom: 16px; }
+        .safari-booking-form .form-group label { display: block; font-size: 12px; font-weight: 700; color: #374151; margin-bottom: 6px; }
+        .safari-booking-form .form-control { width: 100%; padding: 12px; border: 2px solid #e5e7eb; border-radius: 12px; font-size: 14px; background: white; box-sizing: border-box; }
         .safari-booking-form .form-control:focus { border-color: #298742; outline: none; }
-        .safari-booking-form select.form-control { -webkit-appearance: none; -moz-appearance: none; appearance: none; background-image: url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="%23666"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>\'); background-repeat: no-repeat; background-position: right 14px center; background-size: 16px; }
-        .safari-booking-form .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-        .safari-booking-form .cf7-submit { width: 100%; background: #F5A623; color: #1a3c2c; padding: 12px; border-radius: 40px; font-weight: 700; font-size: 15px; border: none; cursor: pointer; margin-top: 8px; }
+        .safari-booking-form select.form-control { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23666\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; }
+        .safari-booking-form .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; }
+        .safari-booking-form .cf7-submit { width: 100%; background: #F5A623; color: #1a3c2c; padding: 14px; border-radius: 40px; font-weight: 700; font-size: 16px; border: none; cursor: pointer; margin-top: 8px; }
         .safari-booking-form .cf7-submit:hover { background: #e09510; }
-        @media (max-width: 640px) { .safari-booking-form .form-row-2 { grid-template-columns: 1fr; gap: 8px; } }
+        @media (max-width: 640px) { .safari-booking-form .form-row-2 { grid-template-columns: 1fr; gap: 0; } }
+        </style>';
+    }
+}
+add_action('wp_head', 'safari_cf7_custom_styles');
+
+// Add Contact Form 7 custom styling with reduced spacing
+function safari_cf7_custom_styles() {
+    if(is_singular('safari')) {
+        echo '<style>
+        .safari-booking-form .form-group {
+            margin-bottom: 8px;
+        }
+        .safari-booking-form .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            border: 2px solid #e5e7eb;
+            border-radius: 12px;
+            font-size: 14px;
+            background: white;
+            box-sizing: border-box;
+            transition: all 0.3s;
+            font-family: inherit;
+        }
+        .safari-booking-form .form-control:focus {
+            border-color: #298742;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(41,135,66,0.1);
+        }
+        .safari-booking-form select.form-control {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' fill=\'none\' viewBox=\'0 0 24 24\' stroke=\'%23666\'%3E%3Cpath stroke-linecap=\'round\' stroke-linejoin=\'round\' stroke-width=\'2\' d=\'M19 9l-7 7-7-7\'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 14px center;
+            background-size: 16px;
+            cursor: pointer;
+        }
+        .safari-booking-form .form-row-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+        .safari-booking-form .cf7-submit {
+            width: 100%;
+            background: #F5A623;
+            color: #1a3c2c;
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 15px;
+            border: none;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all 0.3s;
+        }
+        .safari-booking-form .cf7-submit:hover {
+            background: #e09510;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(245,166,35,0.3);
+        }
+        .safari-booking-form .wpcf7-spinner {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .safari-booking-form .wpcf7-not-valid-tip {
+            font-size: 11px;
+            color: #dc3232;
+            margin-top: 4px;
+        }
+        .safari-booking-form .wpcf7-response-output {
+            margin: 16px 0 0 !important;
+            padding: 12px !important;
+            border-radius: 12px !important;
+            text-align: center;
+        }
+        @media (max-width: 640px) {
+            .safari-booking-form .form-row-2 {
+                grid-template-columns: 1fr;
+                gap: 8px;
+            }
+        }
         </style>';
     }
 }

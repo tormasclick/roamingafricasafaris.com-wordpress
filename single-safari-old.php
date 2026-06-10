@@ -1,34 +1,35 @@
 <?php get_header(); ?>
 
 <?php while(have_posts()): the_post(); 
+<?php 
+$faqs_raw = get_post_meta(get_the_ID(), '_safari_faqs', true); 
+$faqs = json_decode($faqs_raw, true); 
+if(!is_array($faqs)) $faqs = array(); 
+?>
+<div style="background: #ff00ff; color: white; padding: 10px; position: fixed; bottom: 0; left: 0; right: 0; z-index: 9999;">
+FAQ Count: <?php echo count($faqs); ?> | Raw: <?php echo substr($faqs_raw, 0, 100); ?>
+</div>
+
     $duration = get_post_meta(get_the_ID(), '_safari_duration', true);
     $price = get_post_meta(get_the_ID(), '_safari_price', true);
+    $country = get_post_meta(get_the_ID(), '_safari_country', true);
+    $max_people = get_post_meta(get_the_ID(), '_safari_max_people', true);
+    $departure = get_post_meta(get_the_ID(), '_safari_departure', true);
     $inclusions = get_post_meta(get_the_ID(), '_safari_inclusions', true);
     $exclusions = get_post_meta(get_the_ID(), '_safari_exclusions', true);
     $faqs_raw = get_post_meta(get_the_ID(), '_safari_faqs', true);
-    $faqs = array();
-    if(!empty($faqs_raw)) {
+    if(is_string($faqs_raw)) {
         $faqs = json_decode($faqs_raw, true);
-        if(!is_array($faqs)) $faqs = array();
+    } else {
+        $faqs = array();
     }
-    $itinerary_days_raw = get_post_meta(get_the_ID(), '_safari_itinerary_days', true);
-    $itinerary_days = array();
-    if(!empty($itinerary_days_raw)) {
-        $itinerary_days = json_decode($itinerary_days_raw, true);
-        if(!is_array($itinerary_days)) $itinerary_days = array();
-    }
-    $low_season_raw = get_post_meta(get_the_ID(), '_safari_low_season', true);
-    $low_season = array();
-    if(!empty($low_season_raw)) {
-        $low_season = json_decode($low_season_raw, true);
-        if(!is_array($low_season)) $low_season = array();
-    }
-    $high_season_raw = get_post_meta(get_the_ID(), '_safari_high_season', true);
-    $high_season = array();
-    if(!empty($high_season_raw)) {
-        $high_season = json_decode($high_season_raw, true);
-        if(!is_array($high_season)) $high_season = array();
-    }
+    $faqs = $faqs_raw ? json_decode($faqs_raw, true) : array();
+    $itinerary_days = get_post_meta(get_the_ID(), '_safari_itinerary_days', true);
+    $itinerary_days = $itinerary_days ? json_decode($itinerary_days, true) : array();
+    $low_season = get_post_meta(get_the_ID(), '_safari_low_season', true);
+    $low_season = $low_season ? json_decode($low_season, true) : array();
+    $high_season = get_post_meta(get_the_ID(), '_safari_high_season', true);
+    $high_season = $high_season ? json_decode($high_season, true) : array();
     $gallery = get_post_meta(get_the_ID(), '_safari_gallery', true);
     $gallery = $gallery ? explode(',', $gallery) : array();
     $featured_image = get_the_post_thumbnail_url(get_the_ID(), 'full');
@@ -45,6 +46,7 @@
 .safari-hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
 .safari-hero-content { position: relative; z-index: 10; height: 400px; display: flex; align-items: center; justify-content: center; text-align: center; color: white; }
 .safari-hero-title { font-size: 48px; font-weight: 700; margin-bottom: 20px; }
+.safari-hero-duration { display: inline-block; background: rgba(0,0,0,0.6); padding: 8px 24px; border-radius: 40px; margin-bottom: 20px; }
 .safari-container { max-width: 1200px; margin: 0 auto; padding: 60px 20px; }
 .safari-grid { display: grid; grid-template-columns: 2fr 1fr; gap: 50px; }
 .safari-section { margin-bottom: 50px; }
@@ -69,9 +71,7 @@
 .pricing-table th { padding: 12px; text-align: center; background: #3a4b2a; color: white; }
 .pricing-table td { padding: 12px; text-align: center; border-bottom: 1px solid #ddd; }
 .faq-item { margin-bottom: 16px; border-bottom: 1px solid #e5e7eb; }
-.faq-question { padding: 16px 0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: #1a3c2c; transition: all 0.3s; }
-.faq-question:hover { color: #298742; }
-.faq-question i { transition: transform 0.3s; }
+.faq-question { padding: 16px 0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-weight: 600; color: #1a3c2c; }
 .faq-answer { display: none; padding-bottom: 16px; color: #666; line-height: 1.6; }
 .faq-item.open .faq-answer { display: block; }
 .faq-item.open .faq-question i { transform: rotate(180deg); }
@@ -87,7 +87,7 @@
 .related-content { padding: 16px; }
 .related-title { font-size: 16px; color: #1a3c2c; margin-bottom: 8px; font-weight: 700; }
 .sidebar-card { background: white; border: 1px solid #e5e7eb; border-radius: 16px; padding: 24px; margin-bottom: 20px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-.whatsapp-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: #25D366; color: white; padding: 14px; border-radius: 40px; text-decoration: none; font-weight: bold; transition: all 0.3s; }
+.whatsapp-btn { display: flex; align-items: center; justify-content: center; gap: 8px; background: #25D366; color: white; padding: 14px; border-radius: 40px; text-decoration: none; font-weight: bold; }
 .whatsapp-btn:hover { background: #1da15a; transform: translateY(-2px); }
 @media (max-width: 768px) { .safari-grid { grid-template-columns: 1fr; } .gallery-grid { grid-template-columns: repeat(2, 1fr); } .related-grid { grid-template-columns: 1fr; } .safari-hero-title { font-size: 32px; } }
 </style>
@@ -101,7 +101,7 @@
     <div class="safari-hero-content">
         <div>
             <?php if($duration): ?>
-                <div style="display: inline-block; background: rgba(0,0,0,0.6); padding: 8px 24px; border-radius: 40px; margin-bottom: 20px;"><i class="far fa-clock"></i> <?php echo esc_html($duration); ?></div>
+                <div class="safari-hero-duration"><i class="far fa-clock"></i> <?php echo esc_html($duration); ?></div>
             <?php endif; ?>
             <h1 class="safari-hero-title"><?php the_title(); ?></h1>
         </div>
@@ -123,7 +123,7 @@
             <?php if(!empty($itinerary_days)): ?>
             <div class="safari-section">
                 <h2>Day-by-Day Itinerary</h2>
-                <p style="color: #666; margin-bottom: 24px;">Tap any day for full details.</p>
+                <p style="color: #666; margin-bottom: 24px;">Tap any day for full details. Swipe horizontally on mobile.</p>
                 <?php foreach($itinerary_days as $day): ?>
                 <div class="itinerary-card">
                     <div class="itinerary-img">
@@ -152,7 +152,6 @@
             <?php endif; ?>
             
             <!-- Inclusions & Exclusions -->
-            <?php if(!empty($inclusions) || !empty($exclusions)): ?>
             <div class="safari-section">
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
                     <?php if(!empty($inclusions)): ?>
@@ -187,7 +186,6 @@
                     <?php endif; ?>
                 </div>
             </div>
-            <?php endif; ?>
             
             <!-- Tour Pricing -->
             <?php if(!empty($low_season) || !empty($high_season)): ?>
@@ -197,32 +195,40 @@
                 
                 <?php if(!empty($low_season)): ?>
                 <div class="pricing-table">
-                    <div class="pricing-header"><h3 style="color: white; margin: 0;">Low Season</h3><p style="margin: 4px 0 0; font-size: 12px;">April · May · November</p></div>
+                    <div class="pricing-header">
+                        <h3 style="color: white; margin: 0;">Low Season</h3>
+                        <p style="margin: 4px 0 0; font-size: 12px;">April · May · November</p>
+                    </div>
                     <div class="pricing-table-inner">
-                        <table><thead><tr><th>Level</th><th>Adventure</th><th>Comfort</th></tr></thead>
-                        <tbody>
-                            <tr><td style="padding: 12px; text-align: center;">1 Person</td><td style="padding: 12px; text-align: center;"><?php echo esc_html($low_season['adventure_1'] ?? '$1,650'); ?></td><td style="padding: 12px; text-align: center;"><?php echo esc_html($low_season['comfort_1'] ?? '$2,640'); ?></td></tr>
-                            <tr><td style="padding: 12px; text-align: center;">2 People</td><td style="padding: 12px; text-align: center;"><?php echo esc_html($low_season['adventure_2'] ?? '$1,400'); ?></td><td style="padding: 12px; text-align: center;"><?php echo esc_html($low_season['comfort_2'] ?? '$2,240'); ?></td></tr>
-                            <tr><td style="padding: 12px; text-align: center;">4 People</td><td style="padding: 12px; text-align: center;"><?php echo esc_html($low_season['adventure_4'] ?? '$1,240'); ?></td><td style="padding: 12px; text-align: center;"><?php echo esc_html($low_season['comfort_4'] ?? '$1,980'); ?></td></tr>
-                            <tr><td style="padding: 12px; text-align: center;">6+ People</td><td style="padding: 12px; text-align: center;"><?php echo esc_html($low_season['adventure_6'] ?? '$1,070'); ?></td><td style="padding: 12px; text-align: center;"><?php echo esc_html($low_season['comfort_6'] ?? '$1,720'); ?></td></tr>
-                        </tbody>
-                    </table>
+                        <table>
+                            <thead><tr><th>Level</th><th>Adventure</th><th>Comfort</th></tr></thead>
+                            <tbody>
+                                <tr><td>1 Person</td><td><?php echo esc_html($low_season['adventure_1'] ?? '$1,650'); ?></td><td><?php echo esc_html($low_season['comfort_1'] ?? '$2,640'); ?></td></tr>
+                                <tr><td>2 People</td><td><?php echo esc_html($low_season['adventure_2'] ?? '$1,400'); ?></td><td><?php echo esc_html($low_season['comfort_2'] ?? '$2,240'); ?></td></tr>
+                                <tr><td>4 People</td><td><?php echo esc_html($low_season['adventure_4'] ?? '$1,240'); ?></td><td><?php echo esc_html($low_season['comfort_4'] ?? '$1,980'); ?></td></tr>
+                                <tr><td>6+ People</td><td><?php echo esc_html($low_season['adventure_6'] ?? '$1,070'); ?></td><td><?php echo esc_html($low_season['comfort_6'] ?? '$1,720'); ?></td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 <?php endif; ?>
                 
                 <?php if(!empty($high_season)): ?>
                 <div class="pricing-table">
-                    <div class="pricing-header"><h3 style="color: white; margin: 0;">High Season</h3><p style="margin: 4px 0 0; font-size: 11px;">January · February · March · June · July · August · September · October · December</p></div>
+                    <div class="pricing-header">
+                        <h3 style="color: white; margin: 0;">High Season</h3>
+                        <p style="margin: 4px 0 0; font-size: 11px;">January · February · March · June · July · August · September · October · December</p>
+                    </div>
                     <div class="pricing-table-inner">
-                        <table><thead><tr><th>Level</th><th>Adventure</th><th>Comfort</th></tr></thead>
-                        <tbody>
-                            <tr><td style="padding: 12px; text-align: center;">1 Person</td><td style="padding: 12px; text-align: center;"><?php echo esc_html($high_season['adventure_1'] ?? '$1,980'); ?></td><td style="padding: 12px; text-align: center;"><?php echo esc_html($high_season['comfort_1'] ?? '$3,170'); ?></td></tr>
-                            <tr><td style="padding: 12px; text-align: center;">2 People</td><td style="padding: 12px; text-align: center;"><?php echo esc_html($high_season['adventure_2'] ?? '$1,680'); ?></td><td style="padding: 12px; text-align: center;"><?php echo esc_html($high_season['comfort_2'] ?? '$2,690'); ?></td></tr>
-                            <tr><td style="padding: 12px; text-align: center;">4 People</td><td style="padding: 12px; text-align: center;"><?php echo esc_html($high_season['adventure_4'] ?? '$1,490'); ?></td><td style="padding: 12px; text-align: center;"><?php echo esc_html($high_season['comfort_4'] ?? '$2,380'); ?></td></tr>
-                            <tr><td style="padding: 12px; text-align: center;">6+ People</td><td style="padding: 12px; text-align: center;"><?php echo esc_html($high_season['adventure_6'] ?? '$1,290'); ?></td><td style="padding: 12px; text-align: center;"><?php echo esc_html($high_season['comfort_6'] ?? '$2,060'); ?></td></tr>
-                        </tbody>
-                    </table>
+                        <table>
+                            <thead><tr><th>Level</th><th>Adventure</th><th>Comfort</th></tr></thead>
+                            <tbody>
+                                <tr><td>1 Person</td><td><?php echo esc_html($high_season['adventure_1'] ?? '$1,980'); ?></td><td><?php echo esc_html($high_season['comfort_1'] ?? '$3,170'); ?></td></tr>
+                                <tr><td>2 People</td><td><?php echo esc_html($high_season['adventure_2'] ?? '$1,680'); ?></td><td><?php echo esc_html($high_season['comfort_2'] ?? '$2,690'); ?></td></tr>
+                                <tr><td>4 People</td><td><?php echo esc_html($high_season['adventure_4'] ?? '$1,490'); ?></td><td><?php echo esc_html($high_season['comfort_4'] ?? '$2,380'); ?></td></tr>
+                                <tr><td>6+ People</td><td><?php echo esc_html($high_season['adventure_6'] ?? '$1,290'); ?></td><td><?php echo esc_html($high_season['comfort_6'] ?? '$2,060'); ?></td></tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
                 <?php endif; ?>
@@ -233,10 +239,16 @@
             <!-- FAQs -->
             <?php if(!empty($faqs)): ?>
             <div class="safari-section">
+<?php if(current_user_can('administrator')): ?>
+<div style="background: yellow; padding: 15px; margin: 15px 0; border: 2px solid red;">
+<strong>DEBUG:</strong> FAQs count = <?php echo count($faqs); ?> | Raw data type: <?php echo gettype($faqs_raw); ?>
+</div>
+<?php endif; ?>
+
                 <h2>Frequently Asked Questions</h2>
                 <?php foreach($faqs as $faq): ?>
                 <div class="faq-item">
-                    <div class="faq-question">
+                    <div class="faq-question" onclick="this.parentElement.classList.toggle('open')">
                         <?php echo esc_html($faq['question']); ?>
                         <i class="fas fa-chevron-down"></i>
                     </div>
@@ -276,11 +288,17 @@
                         <a href="<?php echo get_permalink($related->ID); ?>" class="related-card">
                             <div class="related-img">
                                 <img src="<?php echo esc_url($rel_image); ?>" alt="<?php echo esc_attr($related->post_title); ?>">
-                                <?php if($rel_country): ?><span class="related-badge"><?php echo esc_html($rel_country); ?></span><?php endif; ?>
-                                <?php if($rel_price): ?><span class="related-price">From <?php echo esc_html($rel_price); ?></span><?php endif; ?>
+                                <?php if($rel_country): ?>
+                                    <span class="related-badge"><?php echo esc_html($rel_country); ?></span>
+                                <?php endif; ?>
+                                <?php if($rel_price): ?>
+                                    <span class="related-price">From <?php echo esc_html($rel_price); ?></span>
+                                <?php endif; ?>
                             </div>
                             <div class="related-content">
-                                <?php if($rel_duration): ?><div style="font-size: 12px; color: #666; margin-bottom: 8px;"><i class="far fa-clock"></i> <?php echo esc_html($rel_duration); ?></div><?php endif; ?>
+                                <?php if($rel_duration): ?>
+                                    <div style="font-size: 12px; color: #666; margin-bottom: 8px;"><i class="far fa-clock"></i> <?php echo esc_html($rel_duration); ?></div>
+                                <?php endif; ?>
                                 <h3 class="related-title"><?php echo esc_html($related->post_title); ?></h3>
                                 <p style="color: #298742; font-size: 14px; font-weight: bold;">View Details <i class="fas fa-arrow-right"></i></p>
                             </div>
@@ -297,12 +315,15 @@
                 <div class="sidebar-card">
                     <h3 style="text-align: center; font-size: 20px; margin-bottom: 8px;">Plan Your Safari</h3>
                     <p style="text-align: center; font-size: 12px; color: #666; margin-bottom: 20px;">We reply within 1 hour · Free consultation</p>
+                    <?php if($duration): ?>
+                        <p style="text-align: center; margin-bottom: 20px;"><?php echo esc_html($duration); ?></p>
+                    <?php endif; ?>
                     <?php if($form_shortcode): ?>
                         <?php echo do_shortcode($form_shortcode); ?>
                     <?php else: ?>
                         <div style="background: #f5f0e8; padding: 20px; text-align: center; border-radius: 12px;">
                             <p>Booking form will appear here.</p>
-                            <p>Add shortcode in the "Booking Form Shortcode" meta box.</p>
+                            <p>Add shortcode in the meta box.</p>
                         </div>
                     <?php endif; ?>
                 </div>
@@ -315,16 +336,9 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    var faqItems = document.querySelectorAll('.faq-item');
-    faqItems.forEach(function(item) {
-        var question = item.querySelector('.faq-question');
-        if(question) {
-            question.addEventListener('click', function(e) {
-                e.preventDefault();
-                item.classList.toggle('open');
-            });
-        }
+document.querySelectorAll('.faq-question').forEach(function(el) {
+    el.addEventListener('click', function() {
+        this.parentElement.classList.toggle('open');
     });
 });
 </script>
