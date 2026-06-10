@@ -27,6 +27,12 @@ get_header(); ?>
 <!-- Safari Vehicles Section -->
 <?php get_template_part('template-parts/vehicles-section'); ?>
 
+<!-- How Booking Works Section -->
+<?php get_template_part('template-parts/how-booking-works'); ?>
+
+<!-- Partners Section -->
+<?php get_template_part('template-parts/partners-section'); ?>
+
 <!-- CTA Section -->
 <?php get_template_part('template-parts/cta-section'); ?>
 
